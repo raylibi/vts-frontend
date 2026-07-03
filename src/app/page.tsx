@@ -1,65 +1,106 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+// src/app/page.tsx
+// Landing page publik — pelanggan input nomor resi
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { trackingAPI } from '@/lib/api';
+
+export default function LandingPage() {
+  const router = useRouter();
+  const [kode, setKode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleTrack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = kode.trim().toUpperCase();
+    if (!trimmed) { setError('Masukkan nomor resi terlebih dahulu.'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      await trackingAPI.getByKode(trimmed);
+      router.push(`/tracking/${trimmed}`);
+    } catch {
+      setError('Nomor resi tidak ditemukan. Periksa kembali kode resi Anda.');
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex flex-col" style={{ background: '#f0fdf4', fontFamily: "'DM Sans', sans-serif", color: '#111827' }}>
+      {/* Subtle grid pattern */}
+      <div className="fixed inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(22,163,74,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(22,163,74,0.04) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
+
+      {/* Navbar */}
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5" style={{ background: '#ffffff', borderBottom: '1px solid #d1fae5', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#16a34a' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3" /></svg>
+          </div>
+          <span className="text-sm font-bold tracking-widest" style={{ fontFamily: "'Space Mono', monospace", color: '#111827' }}>VTS LOGISTIK</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <Link href="/login" className="text-xs px-4 py-2 rounded-lg transition-all font-semibold" style={{ background: '#16a34a', color: '#ffffff', fontFamily: "'Space Mono', monospace", letterSpacing: '0.08em', textDecoration: 'none' }}>
+          Login Admin
+        </Link>
+      </nav>
+
+      {/* Hero */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+        <div className="text-xs uppercase tracking-widest mb-6 flex items-center gap-2" style={{ fontFamily: "'Space Mono', monospace", color: '#16a34a' }}>
+          <span className="w-6 h-px inline-block" style={{ background: '#16a34a' }} />
+          Lacak paket Anda secara real-time
+          <span className="w-6 h-px inline-block" style={{ background: '#16a34a' }} />
+        </div>
+        <h1 className="text-5xl font-light leading-tight mb-4" style={{ letterSpacing: '-0.02em', maxWidth: 600, color: '#111827' }}>
+          Di mana paket<br />
+          <span className="font-semibold" style={{ color: '#16a34a' }}>Anda sekarang?</span>
+        </h1>
+        <p className="text-sm mb-12 max-w-sm" style={{ color: '#6b7280', lineHeight: 1.8 }}>
+          Pantau posisi truk pengiriman dan status paket Anda secara langsung menggunakan teknologi RFID + GPS.
+        </p>
+
+        {/* Form */}
+        <form onSubmit={handleTrack} className="w-full max-w-md">
+          <div className="flex gap-3">
+            <input
+              value={kode}
+              onChange={e => setKode(e.target.value)}
+              placeholder="Masukkan nomor resi, contoh: PKT-001"
+              className="flex-1 px-4 py-3.5 rounded-xl text-sm outline-none"
+              style={{ background: '#ffffff', border: '1px solid #d1d5db', color: '#111827', fontFamily: "'DM Sans', sans-serif", boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+              onFocus={e => { e.target.style.borderColor = '#16a34a'; e.target.style.background = '#f0fdf4'; }}
+              onBlur={e => { e.target.style.borderColor = '#d1d5db'; e.target.style.background = '#ffffff'; }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3.5 rounded-xl font-semibold text-sm transition-all shrink-0"
+              style={{ background: loading ? 'rgba(22,163,74,0.6)' : '#16a34a', color: '#ffffff', border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}
+            >
+              {loading ? '...' : 'Lacak'}
+            </button>
+          </div>
+          {error && (
+            <p className="mt-3 text-xs text-center" style={{ color: '#dc2626' }}>{error}</p>
+          )}
+        </form>
+
+        {/* Feature pills */}
+        <div className="flex flex-wrap justify-center gap-3 mt-16">
+          {['RFID Real-time', 'GPS Tracking', 'Alert Otomatis'].map(f => (
+            <span key={f} className="text-xs px-4 py-2 rounded-full" style={{ background: '#ffffff', border: '1px solid #d1fae5', color: '#16a34a', fontFamily: "'Space Mono', monospace", boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+              {f}
+            </span>
+          ))}
         </div>
       </main>
+
+      <footer className="relative z-10 text-center pb-8 text-xs" style={{ color: '#9ca3af', fontFamily: "'Space Mono', monospace" }}>
+        VTS LOGISTIK · Telkom University Capstone Design 2026
+      </footer>
     </div>
   );
 }
