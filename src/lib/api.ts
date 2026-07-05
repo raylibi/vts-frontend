@@ -34,7 +34,14 @@ async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Pr
     headers,
   });
 
-  const data = await res.json();
+  // Respons bisa saja bukan JSON (mis. 502 dari proxy) — jangan crash saat parse
+  let data: { message?: string } & T;
+  try {
+    data = await res.json();
+  } catch {
+    if (!res.ok) throw new Error(`Request gagal: ${res.status} ${res.statusText}`);
+    throw new Error('Respons server tidak valid');
+  }
 
   if (!res.ok) {
     throw new Error(data.message ?? `Request gagal: ${res.status}`);

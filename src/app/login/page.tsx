@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
+import { setSession } from '@/lib/session';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,8 +21,13 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem('vts_token');
     if (token) {
-      const user = JSON.parse(localStorage.getItem('vts_user') || '{}');
-      router.replace(user.role === 'driver' ? '/driver/dashboard' : '/dashboard');
+      try {
+        const user = JSON.parse(localStorage.getItem('vts_user') || '{}');
+        router.replace(user.role === 'driver' ? '/driver/dashboard' : '/dashboard');
+      } catch {
+        // Cache user korup — biarkan user login ulang
+        localStorage.removeItem('vts_user');
+      }
     }
   }, [router]);
 
@@ -39,9 +45,7 @@ export default function LoginPage() {
     try {
       const data = await authAPI.login(email.trim(), password);
 
-      localStorage.setItem('vts_token', data.data.token);
-      localStorage.setItem('vts_user', JSON.stringify(data.data.user));
-      document.cookie = `vts_token=${data.data.token}; path=/; max-age=86400`;
+      setSession(data.data.token, data.data.user);
 
       const role: string = data.data.user.role;
       setSuccessRole(role);

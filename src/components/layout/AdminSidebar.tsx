@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { destroySocket } from '@/lib/socket';
+import { clearSession } from '@/lib/session';
 
 const NAV_ITEMS = [
   {
@@ -72,9 +73,7 @@ export default function AdminSidebar() {
 
   const handleLogout = () => {
     destroySocket();
-    localStorage.removeItem('vts_token');
-    localStorage.removeItem('vts_user');
-    document.cookie = 'vts_token=; path=/; max-age=0';
+    clearSession();
     router.push('/login');
   };
 

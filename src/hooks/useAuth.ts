@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI, type UserData } from '@/lib/api';
+import { clearSession } from '@/lib/session';
 
 interface UseAuthOptions {
   /** Role yang diizinkan. Kalau undefined semua role boleh masuk. */
@@ -66,9 +67,7 @@ export function useAuth({ requiredRole, redirectTo = '/login' }: UseAuthOptions 
       })
       .catch(() => {
         // Token expired atau tidak valid
-        localStorage.removeItem('vts_token');
-        localStorage.removeItem('vts_user');
-        document.cookie = 'vts_token=; path=/; max-age=0';
+        clearSession();
         router.replace(redirectTo);
       })
       .finally(() => setLoading(false));

@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   '/manifest',
   '/riwayat',
   '/driver',
+  '/settings',
 ];
 
 /** Route khusus admin — driver tidak boleh masuk */
@@ -21,6 +22,7 @@ const ADMIN_ONLY_PREFIXES = [
   '/armada',
   '/manifest',
   '/riwayat',
+  '/settings',
 ];
 
 /** Route khusus driver — admin tetap boleh (redirect ke dashboard) */
@@ -115,5 +117,6 @@ export const config = {
     '/manifest/:path*',
     '/riwayat/:path*',
     '/driver/:path*',
+    '/settings/:path*',
   ],
 };
