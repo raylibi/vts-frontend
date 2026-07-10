@@ -525,8 +525,11 @@ export default function DashboardPage() {
                               ● {ds.online ? 'online' : 'offline'}
                             </span>
                             {ds.online && ds.gps_fix !== null && (
-                              <span style={{ color: ds.gps_fix ? '#16a34a' : '#d97706' }}>
-                                GPS {ds.gps_fix ? '✓' : 'mencari…'}
+                              <span style={{ color: '#6b7280' }}>
+                                GPS{' '}
+                                {ds.gps_fix
+                                  ? <span style={{ color: '#16a34a', fontWeight: 600 }}>OK</span>
+                                  : <span style={{ color: '#d97706' }}>mencari…</span>}
                               </span>
                             )}
                             {ds.online && ds.signal_csq !== null && (
