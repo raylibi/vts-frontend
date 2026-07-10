@@ -41,6 +41,16 @@ export interface TripFinishedPayload {
   trip_id: number;
 }
 
+/** Kondisi alat ESP32 di truk — dari topic MQTT vts/status/# via backend */
+export interface DeviceStatusPayload {
+  id: string;               // kode_truk, mis. "TRUCK-001"
+  online: boolean;          // false = LWT broker (alat putus mendadak)
+  gps_fix: boolean | null;
+  signal_csq: number | null; // 0-31 (AT+CSQ), 99 = tidak diketahui
+  uptime_s: number | null;
+  last_seen: string;
+}
+
 // ─── Typed server → client events ────────────────────────────────────────────
 
 interface ServerToClientEvents {
@@ -48,6 +58,7 @@ interface ServerToClientEvents {
   paket_hilang: (payload: PaketHilangPayload) => void;
   paket_ditemukan: (payload: PaketDitemukanPayload) => void;
   trip_finished: (payload: TripFinishedPayload) => void;
+  device_status: (payload: DeviceStatusPayload) => void;
 }
 
 // ─── Typed client → server events ────────────────────────────────────────────

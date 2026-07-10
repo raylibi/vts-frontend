@@ -351,10 +351,25 @@ export const authAPI = {
 
 // ─── Armada API ───────────────────────────────────────────────────────────────
 
+export interface DeviceStatusItem {
+  id: string;
+  online: boolean;
+  gps_fix: boolean | null;
+  signal_csq: number | null;
+  uptime_s: number | null;
+  last_seen: string;
+}
+
 export const armadaAPI = {
   list: (): Promise<ApiResponse<ArmadaItem[]>> => {
     if (USE_MOCK) return Promise.resolve({ success: true, data: MOCK_ARMADA_LIST as unknown as ArmadaItem[] });
     return apiRequest<ApiResponse<ArmadaItem[]>>('/api/armada');
+  },
+
+  // Kondisi alat ESP32 per truk (online/gps/sinyal) — keyed by kode_truk
+  deviceStatus: (): Promise<ApiResponse<Record<string, DeviceStatusItem>>> => {
+    if (USE_MOCK) return Promise.resolve({ success: true, data: {} });
+    return apiRequest<ApiResponse<Record<string, DeviceStatusItem>>>('/api/armada/device-status');
   },
 
   detail: (trip_id: number): Promise<ApiResponse<ArmadaDetail>> => {

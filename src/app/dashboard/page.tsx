@@ -67,6 +67,15 @@ interface ActiveAlert {
   kode_paket?: string;
 }
 
+interface DeviceStatus {
+  id: string;
+  online: boolean;
+  gps_fix: boolean | null;
+  signal_csq: number | null;
+  uptime_s: number | null;
+  last_seen: string;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function ProgressBar({ pct, warn }: { pct: number; warn: boolean }) {
@@ -78,6 +87,15 @@ function ProgressBar({ pct, warn }: { pct: number; warn: boolean }) {
       />
     </div>
   );
+}
+
+// Kekuatan sinyal seluler dari nilai CSQ (AT+CSQ: 0-31, 99 = tidak diketahui)
+function signalLabel(csq: number): string {
+  if (csq < 0 || csq === 99) return 'sinyal ?';
+  if (csq >= 20) return `sinyal kuat`;
+  if (csq >= 15) return `sinyal baik`;
+  if (csq >= 10) return `sinyal cukup`;
+  return `sinyal lemah`;
 }
 
 function toTruckPin(t: LiveTruck): TruckPin | null {
@@ -95,6 +113,7 @@ export default function DashboardPage() {
   const trucksRef = useRef<Map<number, LiveTruck>>(new Map());
 
   const [trucks, setTrucks] = useState<Map<number, LiveTruck>>(new Map());
+  const [deviceStatus, setDeviceStatus] = useState<Record<string, DeviceStatus>>({});
   const [alerts, setAlerts] = useState<ActiveAlert[]>([]);
   const [wsConnected, setWsConnected] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -169,6 +188,14 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchArmada();
   }, [fetchArmada]);
+
+  // ── Fetch kondisi alat awal (online/gps/sinyal) ───────────────────────────
+  useEffect(() => {
+    if (USE_MOCK) return;
+    armadaAPI.deviceStatus()
+      .then((res) => setDeviceStatus(res.data))
+      .catch((err) => console.error('Gagal fetch status alat:', err));
+  }, []);
 
   // Jaga trucksRef selalu sinkron dengan trucks state
   useEffect(() => {
@@ -258,6 +285,10 @@ export default function DashboardPage() {
     socket.on('trip_started', () => {
       // Trip baru aktif — re-fetch armada agar truk muncul di dashboard
       fetchArmada();
+    });
+
+    socket.on('device_status', (payload: DeviceStatus) => {
+      setDeviceStatus((prev) => ({ ...prev, [payload.id]: payload }));
     });
 
     socket.on('trip_finished', ({ trip_id }: { trip_id: number }) => {
@@ -482,6 +513,30 @@ export default function DashboardPage() {
                         {truck.rute_asal} → {truck.rute_tujuan}
                         {truck.kecepatan_kmh != null && ` · ${Math.round(truck.kecepatan_kmh)} km/h`}
                       </div>
+                      {(() => {
+                        const ds = deviceStatus[truck.kode_truk];
+                        if (!ds) return null;
+                        return (
+                          <div
+                            className="text-xs mt-1.5 flex items-center gap-2 flex-wrap"
+                            style={{ fontFamily: "'Space Mono', monospace" }}
+                          >
+                            <span style={{ color: ds.online ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
+                              ● {ds.online ? 'online' : 'offline'}
+                            </span>
+                            {ds.online && ds.gps_fix !== null && (
+                              <span style={{ color: ds.gps_fix ? '#16a34a' : '#d97706' }}>
+                                GPS {ds.gps_fix ? '✓' : 'mencari…'}
+                              </span>
+                            )}
+                            {ds.online && ds.signal_csq !== null && (
+                              <span style={{ color: '#6b7280' }}>
+                                {signalLabel(ds.signal_csq)} ({ds.signal_csq})
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </Link>
                   );
                 })
