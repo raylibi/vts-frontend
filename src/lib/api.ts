@@ -313,12 +313,13 @@ export interface TrackingResult {
   posisi_kendaraan?: {
     latitude: number;
     longitude: number;
-    kecepatan_kmh: number;
+    kecepatan_kmh: number | null;
     timestamp: string;
   } | null;
   status_rfid?: {
     terdeteksi: boolean;
     waktu: string;
+    terakhir_terdeteksi?: string | null;
   } | null;
 }
 

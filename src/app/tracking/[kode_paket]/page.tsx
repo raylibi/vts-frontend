@@ -130,8 +130,11 @@ export default function TrackingPage() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>
             <strong>Paket tidak terdeteksi oleh RFID reader.</strong>{' '}
-            Peta menampilkan <strong>lokasi terakhir diketahui</strong> berdasarkan posisi kendaraan
-            {data.status_rfid?.waktu ? ` pada ${new Date(data.status_rfid.waktu).toLocaleString('id-ID')}` : ''}.
+            {data.status_rfid?.terakhir_terdeteksi ? (
+              <>Peta menampilkan <strong>lokasi terakhir paket terdeteksi</strong> pada {new Date(data.status_rfid.terakhir_terdeteksi).toLocaleString('id-ID')}.</>
+            ) : (
+              <>Paket belum pernah terdeteksi pada perjalanan ini. Peta menampilkan posisi kendaraan.</>
+            )}
           </span>
         </div>
       )}
@@ -226,8 +229,13 @@ export default function TrackingPage() {
                   {data.status_rfid.terdeteksi ? 'Terdeteksi dalam truk' : 'Tidak terdeteksi'}
                 </span>
               </div>
+              {!data.status_rfid.terdeteksi && data.status_rfid.terakhir_terdeteksi && (
+                <div className="text-xs mt-2" style={{ color: '#dc2626' }}>
+                  Terakhir terdeteksi: {new Date(data.status_rfid.terakhir_terdeteksi).toLocaleString('id-ID')}
+                </div>
+              )}
               <div className="text-xs mt-2" style={{ color: '#9ca3af' }}>
-                Dicek: {new Date(data.status_rfid.waktu).toLocaleString('id-ID')}
+                Pengecekan terakhir: {new Date(data.status_rfid.waktu).toLocaleString('id-ID')}
               </div>
             </div>
           )}
