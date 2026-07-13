@@ -89,11 +89,12 @@ export default function DashboardMap({ trucks }: Props) {
       });
     };
 
-    if (map.loaded()) {
-      sync();
-    } else {
-      map.once('load', sync);
-    }
+    // Langsung sync tanpa menunggu map 'load': marker MapLibre adalah overlay
+    // DOM yang aman dipasang/dipindah kapan pun. Menggerbang dengan map.loaded()
+    // berbahaya — loaded() false setiap ada tile yang sedang diunduh, dan event
+    // 'load' hanya terbit sekali seumur hidup peta, jadi sync yang "dititipkan"
+    // ke once('load') tidak pernah jalan → marker beku sampai halaman di-refresh.
+    sync();
   }, [trucks]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
