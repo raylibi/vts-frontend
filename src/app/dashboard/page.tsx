@@ -26,7 +26,8 @@ interface TelemetryPayload {
   trip_id: number;
   kode_truk: string;
   timestamp: string;
-  gps: { lat: number; lon: number };
+  // null saat GPS truk belum fix — RFID/Ck tetap terkirim tanpa koordinat
+  gps: { lat: number; lon: number } | null;
   completeness_pct: number;
   terdeteksi: number;
   total_paket: number;
@@ -256,8 +257,9 @@ export default function DashboardPage() {
           completeness_pct: payload.completeness_pct,
           terdeteksi:       payload.terdeteksi,
           total_paket:      payload.total_paket,
-          lat:              payload.gps.lat,
-          lon:              payload.gps.lon,
+          // gps null (belum fix) → pertahankan posisi terakhir
+          lat:              payload.gps ? payload.gps.lat : existing.lat,
+          lon:              payload.gps ? payload.gps.lon : existing.lon,
           last_update:      payload.timestamp,
         });
         return next;

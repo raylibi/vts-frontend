@@ -35,8 +35,9 @@ export function useArmada(): UseArmadaReturn {
             ? {
                 ...a,
                 completeness_pct: payload.completeness_pct,
-                latitude: payload.gps.lat,
-                longitude: payload.gps.lon,
+                // gps null (belum fix) → pertahankan posisi terakhir
+                latitude: payload.gps ? payload.gps.lat : a.latitude,
+                longitude: payload.gps ? payload.gps.lon : a.longitude,
               }
             : a
         )

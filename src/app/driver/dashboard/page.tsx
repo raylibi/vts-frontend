@@ -113,6 +113,8 @@ export default function DriverDashboardPage() {
       (payload: TelemetryUpdatePayload) => {
         setLastUpdate(payload.timestamp);
         setCk(payload.completeness_pct);
+        // gps null (belum fix) → Ck tetap update, peta tunggu koordinat berikutnya
+        if (!payload.gps) return;
         const lngLat: [number, number] = [payload.gps.lon, payload.gps.lat];
         pendingPos.current = lngLat;
         if (markerRef.current) markerRef.current.setLngLat(lngLat);

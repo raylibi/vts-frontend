@@ -52,14 +52,15 @@ export function useArmadaDetail(trip_id: number): UseArmadaDetailReturn {
     const handleTelemetry = (payload: TelemetryUpdatePayload) => {
       setLastUpdate(payload.timestamp);
       setCompleteness(payload.completeness_pct);
-      setPosition({ lat: payload.gps.lat, lon: payload.gps.lon });
+      // gps null (belum fix) → pertahankan posisi terakhir, tetap update Ck
+      if (payload.gps) setPosition({ lat: payload.gps.lat, lon: payload.gps.lon });
       setData((prev) =>
         prev
           ? {
               ...prev,
               completeness_pct: payload.completeness_pct,
-              latitude: payload.gps.lat,
-              longitude: payload.gps.lon,
+              latitude: payload.gps ? payload.gps.lat : prev.latitude,
+              longitude: payload.gps ? payload.gps.lon : prev.longitude,
               ringkasan: {
                 ...prev.ringkasan,
                 terdeteksi: payload.terdeteksi,

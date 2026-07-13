@@ -9,7 +9,8 @@ export interface TelemetryUpdatePayload {
   trip_id: number;
   kode_truk: string;
   timestamp: string;
-  gps: { lat: number; lon: number };
+  // null saat GPS truk belum fix — RFID/Ck tetap terkirim tanpa koordinat
+  gps: { lat: number; lon: number } | null;
   completeness_pct: number;
   terdeteksi: number;
   total_paket: number;

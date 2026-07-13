@@ -65,9 +65,11 @@ export default function ArmadaDetailPage() {
       Number(trip_id),
       (payload: TelemetryUpdatePayload) => {
         setLastUpdate(payload.timestamp);
-        setData(prev => prev ? { ...prev, completeness_pct: payload.completeness_pct, latitude: payload.gps.lat, longitude: payload.gps.lon, ringkasan: { ...prev.ringkasan, terdeteksi: payload.terdeteksi, total_paket: payload.total_paket } } : prev);
-        if (markerRef.current) markerRef.current.setLngLat([payload.gps.lon, payload.gps.lat]);
-        if (mapInstance.current) mapInstance.current.panTo([payload.gps.lon, payload.gps.lat]);
+        // gps null (belum fix) → pertahankan posisi terakhir, tetap update Ck
+        const gps = payload.gps;
+        setData(prev => prev ? { ...prev, completeness_pct: payload.completeness_pct, latitude: gps ? gps.lat : prev.latitude, longitude: gps ? gps.lon : prev.longitude, ringkasan: { ...prev.ringkasan, terdeteksi: payload.terdeteksi, total_paket: payload.total_paket } } : prev);
+        if (gps && markerRef.current) markerRef.current.setLngLat([gps.lon, gps.lat]);
+        if (gps && mapInstance.current) mapInstance.current.panTo([gps.lon, gps.lat]);
       },
       (payload: PaketHilangPayload) => {
         setData(prev => {

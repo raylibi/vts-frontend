@@ -48,7 +48,10 @@ export function useTracking(kode_paket: string): UseTrackingReturn {
 
     const handleTelemetry = (payload: TelemetryUpdatePayload) => {
       setLastUpdate(payload.timestamp);
-      setPosition({ lat: payload.gps.lat, lon: payload.gps.lon });
+      // gps null (belum fix) → pertahankan posisi terakhir yang diketahui
+      if (!payload.gps) return;
+      const gps = payload.gps;
+      setPosition({ lat: gps.lat, lon: gps.lon });
 
       // Sinkronisasi posisi_kendaraan di data juga
       setData((prev) =>
@@ -58,8 +61,8 @@ export function useTracking(kode_paket: string): UseTrackingReturn {
               posisi_kendaraan: prev.posisi_kendaraan
                 ? {
                     ...prev.posisi_kendaraan,
-                    latitude: payload.gps.lat,
-                    longitude: payload.gps.lon,
+                    latitude: gps.lat,
+                    longitude: gps.lon,
                   }
                 : null,
             }
