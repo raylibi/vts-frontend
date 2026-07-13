@@ -74,7 +74,7 @@ export default function ArmadaDetailPage() {
       (payload: PaketHilangPayload) => {
         setData(prev => {
           if (!prev) return prev;
-          const newAlert = { id: payload.alert.id, jenis_alert: payload.alert.jenis_alert, deskripsi: payload.alert.deskripsi, status_alert: 'baru', timestamp: payload.alert.timestamp, kode_paket: payload.alert.kode_paket ?? '' };
+          const newAlert = { id: payload.alert.id, package_id: payload.alert.package_id, jenis_alert: payload.alert.jenis_alert, deskripsi: payload.alert.deskripsi, status_alert: 'baru', timestamp: payload.alert.timestamp, kode_paket: payload.alert.kode_paket ?? '' };
           return { ...prev, alerts_aktif: [newAlert, ...prev.alerts_aktif] };
         });
         setPackages(prev => prev.map(p => p.kode_paket === payload.alert.kode_paket ? { ...p, is_detected: false } : p));
@@ -159,12 +159,33 @@ export default function ArmadaDetailPage() {
             <div className="p-5" style={{ borderBottom: '1px solid #f0fdf4' }}>
               <div className="text-xs uppercase tracking-widest mb-3 font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: '#dc2626' }}>Alert aktif</div>
               <div className="space-y-2">
-                {data.alerts_aktif.map(a => (
-                  <div key={a.id} className="p-2.5 text-xs rounded-lg" style={{ background: '#fef2f2', borderLeft: '2px solid #dc2626' }}>
-                    <div style={{ color: '#dc2626', fontWeight: 500 }}>{a.kode_paket} — {a.jenis_alert}</div>
-                    <div className="mt-0.5" style={{ color: '#9ca3af' }}>{new Date(a.timestamp).toLocaleString('id-ID')}</div>
-                  </div>
-                ))}
+                {data.alerts_aktif.map(a => {
+                  const inner = (
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <div style={{ color: '#dc2626', fontWeight: 500 }}>{a.kode_paket} — {a.jenis_alert}</div>
+                        {a.package_id != null && (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" className="shrink-0"><polyline points="9 18 15 12 9 6" /></svg>
+                        )}
+                      </div>
+                      <div className="mt-0.5" style={{ color: '#9ca3af' }}>{new Date(a.timestamp).toLocaleString('id-ID')}</div>
+                    </>
+                  );
+                  return a.package_id != null ? (
+                    <Link key={a.id} href={`/armada/${trip_id}/paket/${a.package_id}`}
+                      className="block p-2.5 text-xs rounded-lg transition-all"
+                      style={{ background: '#fef2f2', borderLeft: '2px solid #dc2626', textDecoration: 'none' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 6px rgba(220,38,38,0.2)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div key={a.id} className="p-2.5 text-xs rounded-lg" style={{ background: '#fef2f2', borderLeft: '2px solid #dc2626' }}>
+                      {inner}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

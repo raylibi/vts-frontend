@@ -115,6 +115,8 @@ export interface PackageItem {
 
 export interface AlertItem {
   id: number;
+  // ID paket untuk link ke halaman detail (bisa absen dari backend versi lama)
+  package_id?: number;
   jenis_alert: string;
   deskripsi: string;
   status_alert: string;

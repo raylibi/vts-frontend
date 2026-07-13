@@ -38,6 +38,7 @@ interface AlertPayload {
   kode_truk: string;
   alert: {
     id: number;
+    package_id?: number;
     jenis_alert: string;
     deskripsi: string;
     timestamp: string;
@@ -66,6 +67,9 @@ interface ActiveAlert {
   deskripsi: string;
   timestamp: string;
   kode_paket?: string;
+  // Untuk link ke halaman detail paket (/armada/[trip_id]/paket/[paket_id])
+  trip_id?: number;
+  package_id?: number;
 }
 
 interface DeviceStatus {
@@ -273,6 +277,8 @@ export default function DashboardPage() {
         deskripsi:   payload.alert.deskripsi,
         timestamp:   payload.alert.timestamp,
         kode_paket:  payload.alert.kode_paket,
+        trip_id:     payload.trip_id,
+        package_id:  payload.alert.package_id,
       };
       setAlerts((prev) => {
         if (prev.some(a => a.id === payload.alert.id)) return prev;
@@ -445,24 +451,54 @@ export default function DashboardPage() {
                   Alert aktif
                 </div>
                 <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  {alerts.slice(0, 5).map((a) => (
-                    <div
-                      key={a.id}
-                      className="p-2.5 text-xs rounded-lg"
-                      style={{
-                        background: '#fef2f2',
-                        border: '1px solid #fecaca',
-                        borderLeft: '3px solid #dc2626',
-                      }}
-                    >
-                      <div className="font-medium" style={{ color: '#dc2626' }}>
-                        {a.kode_paket ?? 'Paket'} tidak terdeteksi
+                  {alerts.slice(0, 5).map((a) => {
+                    const href = a.trip_id != null && a.package_id != null
+                      ? `/armada/${a.trip_id}/paket/${a.package_id}`
+                      : null;
+                    const inner = (
+                      <>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="font-medium" style={{ color: '#dc2626' }}>
+                            {a.kode_paket ?? 'Paket'} tidak terdeteksi
+                          </div>
+                          {href && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" className="shrink-0"><polyline points="9 18 15 12 9 6" /></svg>
+                          )}
+                        </div>
+                        <div className="mt-0.5" style={{ color: '#6b7280' }}>
+                          {a.kode_truk} · {new Date(a.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        {href && (
+                          <div className="mt-0.5" style={{ color: '#9ca3af' }}>
+                            Klik untuk lihat penerima &amp; alamat
+                          </div>
+                        )}
+                      </>
+                    );
+                    const boxStyle: React.CSSProperties = {
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderLeft: '3px solid #dc2626',
+                      textDecoration: 'none',
+                      display: 'block',
+                    };
+                    return href ? (
+                      <Link
+                        key={a.id}
+                        href={href}
+                        className="p-2.5 text-xs rounded-lg transition-all"
+                        style={boxStyle}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 6px rgba(220,38,38,0.2)'; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
+                      >
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div key={a.id} className="p-2.5 text-xs rounded-lg" style={boxStyle}>
+                        {inner}
                       </div>
-                      <div className="mt-0.5" style={{ color: '#6b7280' }}>
-                        {a.kode_truk} · {new Date(a.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

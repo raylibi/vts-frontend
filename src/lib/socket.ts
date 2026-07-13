@@ -21,13 +21,14 @@ export interface PaketHilangPayload {
   kode_truk: string;
   alert: {
     id: number;
+    package_id?: number;
     jenis_alert: string;
     deskripsi: string;
     status_alert: string;
     timestamp: string;
     kode_paket?: string;
     rfid_tag_epc?: string;
-    lokasi?: { lat: number; lon: number };
+    lokasi?: { lat: number; lon: number } | null;
   };
 }
 
