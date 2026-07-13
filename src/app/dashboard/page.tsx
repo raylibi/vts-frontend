@@ -202,6 +202,30 @@ export default function DashboardPage() {
       .catch((err) => console.error('Gagal fetch status alat:', err));
   }, []);
 
+  // ── Fetch alert aktif awal — panel alert tetap terisi setelah refresh.
+  // Hanya alert status 'baru'; yang sudah pulih tidak ikut. Digabung dengan
+  // alert dari websocket tanpa duplikat (id sama di-skip).
+  useEffect(() => {
+    if (USE_MOCK) return;
+    armadaAPI.activeAlerts()
+      .then((res) => {
+        const fetched: ActiveAlert[] = res.data.map((a) => ({
+          id:         a.id,
+          kode_truk:  a.kode_truk,
+          deskripsi:  a.deskripsi,
+          timestamp:  a.timestamp,
+          kode_paket: a.kode_paket,
+          trip_id:    a.trip_id,
+          package_id: a.package_id,
+        }));
+        setAlerts((prev) => {
+          const seen = new Set(prev.map((p) => p.id));
+          return [...prev, ...fetched.filter((f) => !seen.has(f.id))].slice(0, 20);
+        });
+      })
+      .catch((err) => console.error('Gagal fetch alert aktif:', err));
+  }, []);
+
   // Jaga trucksRef selalu sinkron dengan trucks state
   useEffect(() => {
     trucksRef.current = trucks;

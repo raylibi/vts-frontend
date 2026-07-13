@@ -363,10 +363,28 @@ export interface DeviceStatusItem {
   last_seen: string;
 }
 
+// Alert aktif lintas trip (untuk panel alert dashboard — bertahan setelah refresh)
+export interface ActiveAlertItem {
+  id: number;
+  trip_id: number;
+  package_id: number;
+  jenis_alert: string;
+  deskripsi: string;
+  timestamp: string;
+  kode_paket: string;
+  kode_truk: string;
+}
+
 export const armadaAPI = {
   list: (): Promise<ApiResponse<ArmadaItem[]>> => {
     if (USE_MOCK) return Promise.resolve({ success: true, data: MOCK_ARMADA_LIST as unknown as ArmadaItem[] });
     return apiRequest<ApiResponse<ArmadaItem[]>>('/api/armada');
+  },
+
+  // Alert 'baru' pada trip aktif — alert yang sudah pulih tidak ikut
+  activeAlerts: (): Promise<ApiResponse<ActiveAlertItem[]>> => {
+    if (USE_MOCK) return Promise.resolve({ success: true, data: [] });
+    return apiRequest<ApiResponse<ActiveAlertItem[]>>('/api/armada/alerts');
   },
 
   // Kondisi alat ESP32 per truk (online/gps/sinyal) — keyed by kode_truk
